@@ -8,10 +8,12 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
 });
 
+let dbConnected = false;
+
 async function createTables() {
-  const client = pool.connect();
-  
   try {
+    const client = await pool.connect();
+    
     await client.query(`
       CREATE TABLE IF NOT EXISTS favorites (
         id SERIAL PRIMARY KEY,
@@ -23,12 +25,16 @@ async function createTables() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
-    console.log('Database tables created successfully');
+    
+    client.release();
+    dbConnected = true;
+    console.log('✅ Database connected and tables created');
   } catch (error) {
-    console.error('Error creating tables:', error);
+    console.log('⚠️  Database not available, using memory storage');
+    console.log('To use PostgreSQL: Install PostgreSQL and update .env file');
   }
 }
 
 createTables();
 
-module.exports = pool;
+module.exports = { pool, dbConnected };
