@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Locale</title>
+</head>
+<body>
+    <h1>Event Finder</h1>
+    <button onclick="loadEvents()">Load Events</button>
+    
+    <div id="events"></div>
+
+    <script>
+        async function loadEvents() {
+            const response = await fetch('http://localhost:3000/events');
+            const events = await response.json();
+            
+            const eventsDiv = document.getElementById('events');
+            eventsDiv.innerHTML = '';
+            
+            events.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.innerHTML = `
+                    <h3>${event.name}</h3>
+                    <p>Date: ${event.date}</p>
+                    <p>Location: ${event.location}, ${event.city}</p>
+                `;
+                eventsDiv.appendChild(eventDiv);
+            });
+        }
+    </script>
+</body>
+</html>
