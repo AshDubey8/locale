@@ -1,8 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+require('dotenv').config();
+
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 
@@ -14,7 +16,7 @@ app.get('/events', async (req, res) => {
   const { q } = req.query;
   
   try {
-    const apiKey = 'YOUR_API_KEY_HERE';
+    const apiKey = process.env.TICKETMASTER_API_KEY;
     const response = await axios.get('https://app.ticketmaster.com/discovery/v2/events.json', {
       params: {
         apikey: apiKey,
