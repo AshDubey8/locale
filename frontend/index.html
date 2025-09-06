@@ -1,45 +1,104 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Locale</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>locale</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Event Finder</h1>
-    <input type="text" id="searchInput" placeholder="Search events...">
-    <button onclick="searchEvents()">Search</button>
-    <button onclick="loadEvents()">Load All Events</button>
-    
-    <div id="events"></div>
+    <div class="container">
+        <h1>Locale</h1>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="enter city name">
+                <button class="btn-primary" onclick="searchEvents()">search events</button>
+                <button class="btn-secondary" onclick="loadEvents()">browse</button>
+            </div>
+        </div>
+        
+        <div id="events"></div>
+    </div>
 
     <script>
         async function loadEvents() {
-            const response = await fetch('http://localhost:3000/events');
-            const events = await response.json();
-            displayEvents(events);
+            showLoading();
+            try {
+                const response = await fetch('http://localhost:3000/events');
+                const events = await response.json();
+                displayEvents(events);
+            } catch (error) {
+                showError('Failed to load events. Please try again.');
+            }
         }
 
         async function searchEvents() {
-            const query = document.getElementById('searchInput').value;
-            const response = await fetch(`http://localhost:3000/events?q=${encodeURIComponent(query)}`);
-            const events = await response.json();
-            displayEvents(events);
+            const query = document.getElementById('searchInput').value.trim();
+            if (!query) {
+                alert('Please enter a city name to search');
+                return;
+            }
+            
+            showLoading();
+            try {
+                const response = await fetch(`http://localhost:3000/events?city=${encodeURIComponent(query)}`);
+                const events = await response.json();
+                displayEvents(events);
+            } catch (error) {
+                showError('Failed to search events. Please try again.');
+            }
+        }
+
+        function showLoading() {
+            const eventsDiv = document.getElementById('events');
+            eventsDiv.innerHTML = '<div class="loading">Loading events...</div>';
+        }
+
+        function showError(message) {
+            const eventsDiv = document.getElementById('events');
+            eventsDiv.innerHTML = `<div class="no-events">${message}</div>`;
         }
 
         function displayEvents(events) {
             const eventsDiv = document.getElementById('events');
             eventsDiv.innerHTML = '';
             
+            if (!events || events.length === 0) {
+                eventsDiv.innerHTML = '<div class="no-events">No events found. Try searching for a different city.</div>';
+                return;
+            }
+            
             events.forEach(event => {
                 const eventDiv = document.createElement('div');
+                eventDiv.className = 'event-card';
                 eventDiv.innerHTML = `
-                    <h3>${event.name}</h3>
-                    <p>Date: ${event.date}</p>
-                    <p>Location: ${event.location}, ${event.city}</p>
+                    <div class="event-title">${event.name || 'Event Name'}</div>
+                    <div class="event-info">
+                        <div class="event-detail">
+                            <strong>Date:</strong> 
+                            <span class="event-date">${event.date || 'Date TBA'}</span>
+                        </div>
+                        <div class="event-detail">
+                            <strong>Venue:</strong> 
+                            <span class="event-venue">${event.location || 'Venue TBA'}</span>
+                        </div>
+                        <div class="event-detail">
+                            <strong>City:</strong> 
+                            <span>${event.city || 'City TBA'}</span>
+                        </div>
+                    </div>
                 `;
                 eventsDiv.appendChild(eventDiv);
             });
         }
+
+        // Add enter key support for search
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchEvents();
+            }
+        });
     </script>
 </body>
 </html>
