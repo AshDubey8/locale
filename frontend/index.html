@@ -5,7 +5,9 @@
 </head>
 <body>
     <h1>Event Finder</h1>
-    <button onclick="loadEvents()">Load Events</button>
+    <input type="text" id="searchInput" placeholder="Search events...">
+    <button onclick="searchEvents()">Search</button>
+    <button onclick="loadEvents()">Load All Events</button>
     
     <div id="events"></div>
 
@@ -13,7 +15,17 @@
         async function loadEvents() {
             const response = await fetch('http://localhost:3000/events');
             const events = await response.json();
-            
+            displayEvents(events);
+        }
+
+        async function searchEvents() {
+            const query = document.getElementById('searchInput').value;
+            const response = await fetch(`http://localhost:3000/events?q=${encodeURIComponent(query)}`);
+            const events = await response.json();
+            displayEvents(events);
+        }
+
+        function displayEvents(events) {
             const eventsDiv = document.getElementById('events');
             eventsDiv.innerHTML = '';
             

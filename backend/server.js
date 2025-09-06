@@ -24,9 +24,27 @@ app.get('/events', (req, res) => {
       date: '2025-09-10',
       location: 'Mega Mall',
       city: 'Bangalore'
+    },
+    {
+      id: '3',
+      name: 'Football Match',
+      date: '2025-09-12',
+      location: 'Sports Complex',
+      city: 'Mumbai'
     }
   ];
-  res.json(events);
+
+  const { q } = req.query;
+  
+  if (q) {
+    const filtered = events.filter(event => 
+      event.name.toLowerCase().includes(q.toLowerCase()) ||
+      event.city.toLowerCase().includes(q.toLowerCase())
+    );
+    res.json(filtered);
+  } else {
+    res.json(events);
+  }
 });
 
 app.listen(port, () => {
