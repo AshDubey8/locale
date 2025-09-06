@@ -1,12 +1,14 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const pool = require('./database');
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
+app.use(express.json());
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -61,6 +63,32 @@ app.get('/events', async (req, res) => {
     ) : fallbackEvents;
 
     res.json(filtered);
+  }
+});
+
+app.post('/favorites', async (req, res) => {
+  try {
+    const { event_id, name, date, location, city } = req.body;
+    
+    const result = await pool.query(
+      'INSERT INTO favorites (event_id, name, date, location, city) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [event_id, name, date, location, city]
+    );
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error saving favorite:', error);
+    res.status(500).json({ error: 'Failed to save favorite' });
+  }
+});
+
+app.get('/favorites', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM favorites ORDER BY created_at DESC');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error getting favorites:', error);
+    res.status(500).json({ error: 'Failed to get favorites' });
   }
 });
 
