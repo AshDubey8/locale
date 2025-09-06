@@ -2,14 +2,37 @@
 
 Event discovery app
 
-## Idea
-Build a website where I can search for events like concerts, sports games, etc.
+## Setup
 
-## Plan
-1. Start with a basic Node.js server
-2. Add an API endpoint that fetches events
-3. Create a simple HTML page to display them
-4. Make it look decent with CSS
-5. Maybe add favorites later
+1. Clone the repo
+2. Install backend dependencies:
+   ```
+   cd backend
+   npm install
+   ```
 
-Eventbrite API doesnt allow free access to data.
+3. Set up environment variables:
+   ```
+   cp .env.example .env
+   ```
+   Then edit `.env` and add your Ticketmaster API credentials
+
+4. Start the backend:
+   ```
+   npm start
+   ```
+
+5. Open `frontend/index.html` in your browser
+
+## Getting API Keys
+
+1. Go to https://developer.ticketmaster.com/
+2. Create a free account
+3. Register your application
+4. Copy your Consumer Key and Secret to `.env`
+
+## Tech Stack
+
+- Backend: Node.js, Express
+- Frontend: HTML, CSS, JavaScript
+- API: Ticketmaster Discovery API
