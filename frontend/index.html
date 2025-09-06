@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Locale</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Event Finder</h1>
+    <input type="text" id="searchInput" placeholder="Search events...">
+    <button onclick="searchEvents()">Search</button>
+    <button onclick="loadEvents()">Load All Events</button>
+    
+    <div id="events"></div>
+
+    <script>
+        async function loadEvents() {
+            const response = await fetch('http://localhost:3000/events');
+            const events = await response.json();
+            displayEvents(events);
+        }
+
+        async function searchEvents() {
+            const query = document.getElementById('searchInput').value;
+            const response = await fetch(`http://localhost:3000/events?q=${encodeURIComponent(query)}`);
+            const events = await response.json();
+            displayEvents(events);
+        }
+
+        function displayEvents(events) {
+            const eventsDiv = document.getElementById('events');
+            eventsDiv.innerHTML = '';
+            
+            events.forEach(event => {
+                const eventDiv = document.createElement('div');
+                eventDiv.innerHTML = `
+                    <h3>${event.name}</h3>
+                    <p>Date: ${event.date}</p>
+                    <p>Location: ${event.location}, ${event.city}</p>
+                `;
+                eventsDiv.appendChild(eventDiv);
+            });
+        }
+    </script>
+</body>
+</html>
