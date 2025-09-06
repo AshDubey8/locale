@@ -12,6 +12,14 @@ let dbConnected = false;
 
 async function createTables() {
   try {
+    console.log('🔄 Attempting database connection...');
+    console.log('Connection config:', {
+      user: process.env.DB_USER,
+      host: process.env.DB_HOST,
+      database: process.env.DB_NAME,
+      port: process.env.DB_PORT
+    });
+    
     const client = await pool.connect();
     
     await client.query(`
@@ -30,6 +38,7 @@ async function createTables() {
     dbConnected = true;
     console.log('✅ Database connected and tables created');
   } catch (error) {
+    console.log('❌ Database connection failed:', error.message);
     console.log('⚠️  Database not available, using memory storage');
     console.log('To use PostgreSQL: Install PostgreSQL and update .env file');
   }

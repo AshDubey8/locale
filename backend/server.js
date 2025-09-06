@@ -1,8 +1,12 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
+
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
 const { pool, dbConnected } = require('./database');
-require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -10,10 +14,40 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+const apiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 60, // 60 requests per minute
+  message: {
+    error: 'Too many requests from this IP, please try again later.',
+    retryAfter: '1 minute'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const searchLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute  
+  max: 30, // 30 searches per minute
+  message: {
+    error: 'Too many searches, please wait before searching again.',
+    retryAfter: '1 minute'
+  }
+});
+
+app.use('/events', searchLimiter);
+app.use('/favorites', apiLimiter);
+
 let memoryFavorites = [];
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.json({ 
+    message: 'Locale API is running!',
+    database: dbConnected ? 'PostgreSQL' : 'Memory Storage',
+    rateLimits: {
+      events: '30 requests/minute',
+      favorites: '60 requests/minute'
+    }
+  });
 });
 
 app.get('/events', async (req, res) => {
