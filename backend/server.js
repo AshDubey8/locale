@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const axios = require('axios');
 const app = express();
 const port = 3000;
 
@@ -9,41 +10,55 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.get('/events', (req, res) => {
-  const events = [
-    {
-      id: '1',
-      name: 'Music Event',
-      date: '2025-09-09',
-      location: 'Uppal Stadium',
-      city: 'Hyderabad'
-    },
-    {
-      id: '2', 
-      name: 'Dance Event',
-      date: '2025-09-10',
-      location: 'Mega Mall',
-      city: 'Bangalore'
-    },
-    {
-      id: '3',
-      name: 'Football Match',
-      date: '2025-09-12',
-      location: 'Sports Complex',
-      city: 'Mumbai'
-    }
-  ];
-
+app.get('/events', async (req, res) => {
   const { q } = req.query;
   
-  if (q) {
-    const filtered = events.filter(event => 
+  try {
+    const apiKey = 'YOUR_API_KEY_HERE';
+    const response = await axios.get('https://app.ticketmaster.com/discovery/v2/events.json', {
+      params: {
+        apikey: apiKey,
+        keyword: q || 'music',
+        countryCode: 'US',
+        size: 10
+      }
+    });
+
+    const events = response.data._embedded?.events?.map(event => ({
+      id: event.id,
+      name: event.name,
+      date: event.dates?.start?.localDate || 'TBD',
+      location: event._embedded?.venues?.[0]?.name || 'TBD',
+      city: event._embedded?.venues?.[0]?.city?.name || 'TBD'
+    })) || [];
+
+    res.json(events);
+  } catch (error) {
+    console.error('API Error:', error.message);
+    
+    const fallbackEvents = [
+      {
+        id: '1',
+        name: 'Music Event',
+        date: '2025-09-09',
+        location: 'Uppal Stadium',
+        city: 'Hyderabad'
+      },
+      {
+        id: '2', 
+        name: 'Dance Event',
+        date: '2025-09-10',
+        location: 'Mega Mall',
+        city: 'Bangalore'
+      }
+    ];
+
+    const filtered = q ? fallbackEvents.filter(event => 
       event.name.toLowerCase().includes(q.toLowerCase()) ||
       event.city.toLowerCase().includes(q.toLowerCase())
-    );
+    ) : fallbackEvents;
+
     res.json(filtered);
-  } else {
-    res.json(events);
   }
 });
 
