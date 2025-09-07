@@ -1,13 +1,12 @@
 # Locale
 
-A full-stack event discovery application that helps users find local events using the Ticketmaster API. Users can search for events by city and save favorites to a PostgreSQL database.
+A full-stack event discovery application that helps you find local events using the Ticketmaster API. You can search for events by city and save favorites to a PostgreSQL database.
 
 ## Features
 
 - Search events by city with real-time results
 - Save and manage favorite events
 - Rate limiting protection (60 requests/minute)
-- Responsive web interface
 - PostgreSQL database with connection pooling
 
 ## Tech Stack
